@@ -254,6 +254,18 @@
 }
 
 
+- (NSString *)stringForPeerConnectionState:(RTCPeerConnectionState)state {
+    switch (state) {
+        case RTCPeerConnectionStateNew: return @"new";
+        case RTCPeerConnectionStateConnecting: return @"connecting";
+        case RTCPeerConnectionStateConnected: return @"connected";
+        case RTCPeerConnectionStateDisconnected: return @"disconnected";
+        case RTCPeerConnectionStateFailed: return @"failed";
+        case RTCPeerConnectionStateClosed: return @"closed";
+    }
+    return nil;
+}
+
 /**
  * Parses the constraint keys and values of a specific JavaScript object into
  * a specific <tt>NSMutableDictionary</tt> in a format suitable for the
@@ -491,9 +503,14 @@
 }
 
 /** Called any time the PeerConnectionState changes. */
-- (void)peerConnection:(RTCPeerConnection *)peerConnection
-didChangeConnectionState:(RTCPeerConnectionState)newState {
-    
+- (void)peerConnection:(RTCPeerConnection *)peerConnection didChangeConnectionState:(RTCPeerConnectionState)newState {
+    FlutterEventSink eventSink = peerConnection.eventSink;
+    if(eventSink){
+        eventSink(@{
+                    @"event" : @"peerConnectionState",
+                    @"state" : [self stringForPeerConnectionState:newState]
+                    });
+    }
 }
 
 - (void)peerConnection:(RTCPeerConnection *)peerConnection
